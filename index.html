@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CakeFruits - Blox Fruits Trade Calculator & Matcher</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter & Orbitron -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0a0e17',
+                            card: '#131b2e',
+                            border: '#1f2d4d',
+                            accent: '#1f6feb',
+                            glow: '#00d2ff',
+                            neon: '#38bdf8',
+                            success: '#10b981',
+                            danger: '#ef4444'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        gamer: ['Orbitron', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #060911;
+            background-image: 
+                radial-gradient(at 20% 20%, rgba(31, 111, 235, 0.15) 0px, transparent 50%),
+                radial-gradient(at 80% 80%, rgba(0, 210, 255, 0.1) 0px, transparent 50%);
+            color: #f0f6fc;
+            min-height: 100vh;
+        }
+
+        .glow-box {
+            box-shadow: 0 0 20px rgba(31, 111, 235, 0.25);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        .glow-box:hover {
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.4);
+            border-color: rgba(56, 189, 248, 0.5);
+        }
+
+        .card-selected {
+            border-color: #00d2ff !important;
+            box-shadow: 0 0 25px rgba(0, 210, 255, 0.5) !important;
+            background: linear-gradient(145deg, #131b2e, #1a2744) !important;
+        }
+
+        .text-glow {
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0e17;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2d4d;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1f6feb;
+        }
+    </style>
+</head>
+<body class="font-sans pb-12 flex flex-col min-h-screen">
+
+    <!-- Header Section -->
+    <header class="border-b border-brand-border bg-brand-dark/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-brand-accent to-brand-glow p-0.5 flex items-center justify-center shadow-lg shadow-brand-accent/30">
+                    <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
+                        <i class="fa-solid font-bold fa-cube text-2xl text-brand-glow"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="font-gamer text-2xl sm:text-3xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-brand-neon to-brand-glow">
+                        CAKEFRUITS
+                    </h1>
+                    <p class="text-xs text-slate-400">Blox Fruits Trade Calculator & Matcher</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 bg-brand-card border border-brand-border px-4 py-2 rounded-full">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-xs font-semibold text-slate-300">Sistema de Trocas Ativo</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+
+        <!-- Intro Banner -->
+        <div class="mb-10 text-center max-w-3xl mx-auto">
+            <h2 class="font-gamer text-2xl sm:text-4xl font-bold mb-3 text-glow">
+                SISTEMA DE VALIDAÇÃO DE TROCAS
+            </h2>
+            <p class="text-slate-300 text-sm sm:text-base">
+                Escolha a fruta que deseja receber no jogo e monte sua oferta com as frutas do seu inventário para verificar a equivalência exata!
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left Side: Selection Area (8 cols) -->
+            <div class="lg:col-span-7 space-y-10">
+
+                <!-- PASSO 1: Fruta Desejada -->
+                <section class="bg-brand-card/60 backdrop-blur-sm p-6 rounded-2xl border border-brand-border">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-8 h-8 rounded-lg bg-brand-accent flex items-center justify-center text-white font-bold font-gamer">1</div>
+                        <h3 class="font-gamer text-lg sm:text-xl font-bold text-white">Escolha a Fruta Desejada</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="targetFruitsGrid">
+                        <!-- Generative content via JS -->
+                    </div>
+                </section>
+
+                <!-- PASSO 2: Frutas em Oferta -->
+                <section class="bg-brand-card/60 backdrop-blur-sm p-6 rounded-2xl border border-brand-border">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-brand-accent flex items-center justify-center text-white font-bold font-gamer">2</div>
+                            <h3 class="font-gamer text-lg sm:text-xl font-bold text-white">Sua Oferta de Troca</h3>
+                        </div>
+                        <button onclick="resetOffer()" class="text-xs text-slate-400 hover:text-red-400 flex items-center gap-1 transition-colors">
+                            <i class="fa-solid fa-trash-can"></i> Limpar Oferta
+                        </button>
+                    </div>
+
+                    <p class="text-xs text-slate-400 mb-4">Clique nas frutas abaixo para adicionar ou remover da sua oferta de troca:</p>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="inventoryGrid">
+                        <!-- Generative content via JS -->
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Side: Live Validation & Summary (5 cols) -->
+            <div class="lg:col-span-5">
+                <div class="sticky top-24 space-y-6">
+
+                    <div class="bg-brand-card p-6 rounded-2xl border border-brand-border glow-box transition-all">
+                        <h3 class="font-gamer text-xl font-bold mb-4 pb-3 border-b border-brand-border flex items-center justify-between">
+                            <span>Resumo da Troca</span>
+                            <i class="fa-solid fa-scale-balanced text-brand-neon"></i>
+                        </h3>
+
+                        <!-- Target Selected Display -->
+                        <div class="mb-6">
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Fruta Desejada:</span>
+                            <div id="selectedTargetDisplay" class="p-3 bg-brand-dark/80 rounded-xl border border-brand-border flex items-center gap-3">
+                                <span class="text-slate-500 text-sm italic">Nenhuma fruta selecionada</span>
+                            </div>
+                        </div>
+
+                        <!-- Requisitos da Fruta Selecionada -->
+                        <div class="mb-6">
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Requisito Oficial do Card:</span>
+                            <div id="targetRequirementsDisplay" class="p-3 bg-brand-dark/40 rounded-xl border border-brand-border/60 text-xs text-slate-300">
+                                Selecione uma fruta desejada para ver a combinação necessária.
+                            </div>
+                        </div>
+
+                        <!-- Offer List Display -->
+                        <div class="mb-6">
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Sua Oferta Atual:</span>
+                            <div id="offeredListDisplay" class="p-3 bg-brand-dark/80 rounded-xl border border-brand-border min-h-[70px] flex flex-wrap gap-2 items-center">
+                                <span class="text-slate-500 text-sm italic">Nenhuma fruta adicionada na oferta</span>
+                            </div>
+                        </div>
+
+                        <!-- Status Validation Banner -->
+                        <div id="validationResultBox" class="p-4 rounded-xl mb-6 hidden">
+                            <!-- JS Inject status -->
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="space-y-3">
+                            <button id="whatsappBtn" onclick="sendWhatsAppProposal()" disabled 
+                                class="w-full py-4 px-6 rounded-xl font-bold font-gamer tracking-wide flex items-center justify-center gap-2 transition-all opacity-50 cursor-not-allowed bg-slate-700 text-slate-400 shadow-lg">
+                                <i class="fa-brands fa-whatsapp text-xl"></i>
+                                ENVIAR PROPOSTA VIA WHATSAPP
+                            </button>
+
+                            <button onclick="resetAll()" 
+                                class="w-full py-3 px-4 bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-white rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-rotate-right"></i> Reiniciar Tudo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Instructions Card -->
+                    <div class="bg-brand-card/40 p-4 rounded-xl border border-brand-border/50 text-xs text-slate-400 space-y-2">
+                        <p class="font-semibold text-slate-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-info text-brand-neon"></i> Como Funciona?
+                        </p>
+                        <p>1. Selecione 1 das 5 frutas desejadas.</p>
+                        <p>2. Clique nas frutas abaixo para compor o inventário oferecido.</p>
+                        <p>3. Quando a combinação corresponder exatamente às regras do jogo, o botão do WhatsApp ficará verde!</p>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-brand-border mt-12 py-6 bg-brand-dark">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 space-y-2">
+            <p>© 2026 CakeFruits - Plataforma não oficial de leilões e calculadoras Blox Fruits Roblox.</p>
+            <p>Atendimento direto WhatsApp: <span class="text-brand-neon font-mono">(79) 99609-1330</span></p>
+        </div>
+    </footer>
+
+    <!-- JS Logic -->
+    <script>
+        // Data Configuration for Target Fruits
+        const TARGET_FRUITS = [
+            {
+                id: 'control',
+                name: 'Control',
+                icon: 'fa-brain',
+                color: 'from-pink-500 to-purple-600',
+                reqText: '1 Spirit + 1 T-Rex + 1 Shadow',
+                // Allowed combinations (arrays of fruit IDs sorted)
+                combos: [
+                    ['spirit', 'trex', 'shadow']
+                ]
+            },
+            {
+                id: 'dough',
+                name: 'Dough',
+                icon: 'fa-cookie',
+                color: 'from-amber-600 to-yellow-500',
+                reqText: '1 T-Rex + (1 Gravity OU Venom) + 1 Spirit',
+                combos: [
+                    ['trex', 'gravity', 'spirit'],
+                    ['trex', 'venom', 'spirit']
+                ]
+            },
+            {
+                id: 'pain',
+                name: 'Pain',
+                icon: 'fa-bolt',
+                color: 'from-red-600 to-orange-500',
+                reqText: '1 Gravity + 1 Shadow + 1 Blizzard + 1 Sound',
+                combos: [
+                    ['gravity', 'shadow', 'blizzard', 'sound']
+                ]
+            },
+            {
+                id: 'rumble',
+                name: 'Rumble',
+                icon: 'fa-cloud-bolt',
+                color: 'from-cyan-400 to-blue-600',
+                reqText: '1 Portal OU 1 Buddha',
+                combos: [
+                    ['portal'],
+                    ['buddha']
+                ]
+            },
+            {
+                id: 'kitsune',
+                name: 'Kitsune',
+                icon: 'fa-fire-flame-curved',
+                color: 'from-blue-500 to-indigo-600',
+                reqText: '1 Leopard + 1 Spirit + (1 Dough OU Buddha) + 1 T-Rex',
+                combos: [
+                    ['leopard', 'spirit', 'dough', 'trex'],
+                    ['leopard', 'spirit', 'buddha', 'trex']
+                ]
+            }
+        ];
+
+        // All Available Inventory Fruits
+        const INVENTORY_FRUITS = [
+            { id: 'spirit', name: 'Spirit', icon: 'fa-ghost', color: 'text-cyan-400' },
+            { id: 'trex', name: 'T-Rex', icon: 'fa-dragon', color: 'text-emerald-400' },
+            { id: 'shadow', name: 'Shadow', icon: 'fa-moon', color: 'text-purple-400' },
+            { id: 'gravity', name: 'Gravity', icon: 'fa-meteor', color: 'text-indigo-400' },
+            { id: 'venom', name: 'Venom', icon: 'fa-skull', color: 'text-lime-400' },
+            { id: 'blizzard', name: 'Blizzard', icon: 'fa-snowflake', color: 'text-sky-300' },
+            { id: 'sound', name: 'Sound', icon: 'fa-music', color: 'text-yellow-400' },
+            { id: 'portal', name: 'Portal', icon: 'fa-circle-nodes', color: 'text-teal-300' },
+            { id: 'buddha', name: 'Buddha', icon: 'fa-ankh', color: 'text-amber-300' },
+            { id: 'leopard', name: 'Leopard', icon: 'fa-cat', color: 'text-orange-400' },
+            { id: 'dough', name: 'Dough', icon: 'fa-cookie', color: 'text-yellow-500' }
+        ];
+
+        // Application State
+        let selectedTargetId = null;
+        let offeredFruits = []; // Array of fruit IDs
+
+        // DOM Elements Initializer
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTargetGrid();
+            renderInventoryGrid();
+            updateSummary();
+        });
+
+        // Render Target Fruits Grid
+        function renderTargetGrid() {
+            const container = document.getElementById('targetFruitsGrid');
+            container.innerHTML = TARGET_FRUITS.map(fruit => {
+                const isSelected = selectedTargetId === fruit.id;
+                return `
+                    <div onclick="selectTarget('${fruit.id}')" 
+                        class="cursor-pointer bg-brand-dark p-4 rounded-xl border border-brand-border transition-all duration-200 relative group hover:border-brand-glow ${isSelected ? 'card-selected' : ''}">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-10 h-10 rounded-lg bg-gradient-to-br ${fruit.color} flex items-center justify-center text-white shadow-md">
+                                <i class="fa-solid ${fruit.icon} text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-gamer font-bold text-white text-base">${fruit.name}</h4>
+                                <span class="text-[10px] text-brand-neon bg-brand-accent/20 px-2 py-0.5 rounded-full border border-brand-accent/30">Desejada</span>
+                            </div>
+                        </div>
+                        <div class="text-xs text-slate-400 bg-brand-card/80 p-2.5 rounded-lg border border-brand-border/40">
+                            <span class="text-slate-500 font-semibold block text-[10px] uppercase">Requisitos:</span>
+                            ${fruit.reqText}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render Inventory Grid
+        function renderInventoryGrid() {
+            const container = document.getElementById('inventoryGrid');
+            container.innerHTML = INVENTORY_FRUITS.map(fruit => {
+                const count = offeredFruits.filter(id => id === fruit.id).length;
+                return `
+                    <div onclick="toggleOfferFruit('${fruit.id}')" 
+                        class="cursor-pointer bg-brand-dark p-3 rounded-xl border ${count > 0 ? 'border-brand-neon bg-brand-accent/10' : 'border-brand-border'} hover:border-brand-glow transition-all flex flex-col items-center justify-center text-center relative group">
+                        
+                        ${count > 0 ? `<span class="absolute -top-2 -right-2 bg-brand-glow text-brand-dark font-bold text-xs w-6 h-6 rounded-full flex items-center justify-center shadow-md animate-bounce">${count}</span>` : ''}
+
+                        <i class="fa-solid ${fruit.icon} text-2xl ${fruit.color} mb-1 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-xs font-semibold text-slate-200">${fruit.name}</span>
+                        <span class="text-[10px] text-slate-500 mt-0.5">${count > 0 ? 'Adicionado' : '+ Adicionar'}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Select Target Fruit
+        function selectTarget(id) {
+            selectedTargetId = id;
+            renderTargetGrid();
+            updateSummary();
+        }
+
+        // Add fruit to offer
+        function toggleOfferFruit(id) {
+            offeredFruits.push(id);
+            renderInventoryGrid();
+            updateSummary();
+        }
+
+        // Remove item from offer by index
+        function removeOfferFruit(index) {
+            offeredFruits.splice(index, 1);
+            renderInventoryGrid();
+            updateSummary();
+        }
+
+        // Reset Offer Only
+        function resetOffer() {
+            offeredFruits = [];
+            renderInventoryGrid();
+            updateSummary();
+        }
+
+        // Reset All Selections
+        function resetAll() {
+            selectedTargetId = null;
+            offeredFruits = [];
+            renderTargetGrid();
+            renderInventoryGrid();
+            updateSummary();
+        }
+
+        // Check if trade is valid according to exact rules
+        function validateTrade() {
+            if (!selectedTargetId) return { valid: false, reason: 'Nenhuma fruta desejada foi selecionada.' };
+            if (offeredFruits.length === 0) return { valid: false, reason: 'Nenhuma fruta foi oferecida para troca.' };
+
+            const targetObj = TARGET_FRUITS.find(f => f.id === selectedTargetId);
+            
+            // Sort offered fruits array to compare
+            const sortedOffered = [...offeredFruits].sort();
+
+            // Check against allowed combos
+            const matchesAnyCombo = targetObj.combos.some(combo => {
+                const sortedCombo = [...combo].sort();
+                if (sortedCombo.length !== sortedOffered.length) return false;
+                return sortedCombo.every((val, index) => val === sortedOffered[index]);
+            });
+
+            if (matchesAnyCombo) {
+                return { valid: true, reason: 'Oferta perfeitamente equivalente e atende aos requisitos do trade!' };
+            } else {
+                return { 
+                    valid: false, 
+                    reason: `A oferta atual não atende ao valor correspondente da fruta ${targetObj.name}. Verifique a lista de combinações aceitas.` 
+                };
+            }
+        }
+
+        // Update Summary Sidebar & Validation Box
+        function updateSummary() {
+            const selectedDisplay = document.getElementById('selectedTargetDisplay');
+            const requirementsDisplay = document.getElementById('targetRequirementsDisplay');
+            const offeredDisplay = document.getElementById('offeredListDisplay');
+            const valBox = document.getElementById('validationResultBox');
+            const waBtn = document.getElementById('whatsappBtn');
+
+            // 1. Target Display
+            if (selectedTargetId) {
+                const target = TARGET_FRUITS.find(f => f.id === selectedTargetId);
+                selectedDisplay.innerHTML = `
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br ${target.color} flex items-center justify-center text-white">
+                        <i class="fa-solid ${target.icon}"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <span class="font-gamer font-bold text-white block">${target.name}</span>
+                    </div>
+                `;
+                requirementsDisplay.innerHTML = `<span class="text-brand-glow font-semibold">${target.reqText}</span>`;
+            } else {
+                selectedDisplay.innerHTML = `<span class="text-slate-500 text-sm italic">Nenhuma fruta selecionada</span>`;
+                requirementsDisplay.innerHTML = `Selecione uma fruta desejada para ver a combinação necessária.`;
+            }
+
+            // 2. Offered Fruits Display
+            if (offeredFruits.length > 0) {
+                offeredDisplay.innerHTML = offeredFruits.map((id, index) => {
+                    const fruit = INVENTORY_FRUITS.find(f => f.id === id);
+                    return `
+                        <span class="bg-brand-card hover:bg-red-950/40 border border-brand-border hover:border-red-500/50 text-slate-200 text-xs px-2.5 py-1 rounded-lg flex items-center gap-1.5 transition-all group cursor-pointer" onclick="removeOfferFruit(${index})">
+                            <i class="fa-solid ${fruit.icon} ${fruit.color}"></i>
+                            ${fruit.name}
+                            <i class="fa-solid fa-xmark text-[10px] text-slate-400 group-hover:text-red-400 ml-1"></i>
+                        </span>
+                    `;
+                }).join('');
+            } else {
+                offeredDisplay.innerHTML = `<span class="text-slate-500 text-sm italic">Nenhuma fruta adicionada na oferta</span>`;
+            }
+
+            // 3. Validation Checking
+            if (!selectedTargetId) {
+                valBox.className = 'p-4 rounded-xl mb-6 bg-brand-dark/50 border border-brand-border text-slate-400 text-xs text-center';
+                valBox.innerHTML = '<i class="fa-solid fa-arrow-left mr-1"></i> Selecione uma fruta desejada para iniciar a validação.';
+                valBox.classList.remove('hidden');
+
+                waBtn.disabled = true;
+                waBtn.className = 'w-full py-4 px-6 rounded-xl font-bold font-gamer tracking-wide flex items-center justify-center gap-2 transition-all opacity-50 cursor-not-allowed bg-slate-800 text-slate-500';
+                return;
+            }
+
+            const validation = validateTrade();
+
+            if (validation.valid) {
+                valBox.className = 'p-4 rounded-xl mb-6 bg-emerald-950/40 border border-emerald-500/50 text-emerald-300 text-xs space-y-1 shadow-lg shadow-emerald-950/20';
+                valBox.innerHTML = `
+                    <div class="font-bold font-gamer flex items-center gap-2 text-sm text-emerald-400">
+                        <i class="fa-solid fa-circle-check text-base"></i> TROCA VÁLIDA / EQUIVALENTE!
+                    </div>
+                    <p class="text-slate-300">${validation.reason}</p>
+                `;
+
+                waBtn.disabled = false;
+                waBtn.className = 'w-full py-4 px-6 rounded-xl font-bold font-gamer tracking-wide flex items-center justify-center gap-2 transition-all bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 hover:scale-[1.02] cursor-pointer active:scale-95';
+            } else {
+                valBox.className = 'p-4 rounded-xl mb-6 bg-red-950/30 border border-red-500/40 text-red-300 text-xs space-y-2';
+                valBox.innerHTML = `
+                    <div class="font-bold font-gamer flex items-center gap-2 text-sm text-red-400">
+                        <i class="fa-solid fa-triangle-exclamation text-base"></i> OFERTA INVÁLIDA / INSUFICIENTE
+                    </div>
+                    <p class="text-slate-300">${validation.reason}</p>
+                    <button onclick="resetOffer()" class="mt-2 text-xs bg-red-900/50 hover:bg-red-900 border border-red-700/50 text-red-200 px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-all">
+                        <i class="fa-solid fa-rotate-left"></i> Limpar Oferta e Refazer
+                    </button>
+                `;
+
+                waBtn.disabled = true;
+                waBtn.className = 'w-full py-4 px-6 rounded-xl font-bold font-gamer tracking-wide flex items-center justify-center gap-2 transition-all opacity-50 cursor-not-allowed bg-slate-800 text-slate-500';
+            }
+            valBox.classList.remove('hidden');
+        }
+
+        // WhatsApp Proposal Generation
+        function sendWhatsAppProposal() {
+            const validation = validateTrade();
+            if (!validation.valid) return;
+
+            const targetObj = TARGET_FRUITS.find(f => f.id === selectedTargetId);
+            
+            // Map fruit counts for cleaner text
+            const offeredCountMap = {};
+            offeredFruits.forEach(id => {
+                const fruit = INVENTORY_FRUITS.find(f => f.id === id);
+                offeredCountMap[fruit.name] = (offeredCountMap[fruit.name] || 0) + 1;
+            });
+
+            const offeredFormattedText = Object.entries(offeredCountMap)
+                .map(([name, count]) => `${count}x ${name}`)
+                .join(', ');
+
+            const phone = '5579996091330';
+            const message = `Olá, CakeFruits! Vi a proposta de troca pelo site:\n\n` +
+                `🍎 *Fruta Desejada:* ${targetObj.name}\n` +
+                `🎒 *Minha Oferta:* ${offeredFormattedText}\n` +
+                `✅ *Status:* Oferta Válida e Equivalente\n\n` +
+                `Podemos realizar esse trade no jogo?`;
+
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
+
+            window.open(whatsappUrl, '_blank');
+        }
+    </script>
+</body>
+</html>
